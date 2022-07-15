@@ -3,10 +3,10 @@ from getpass import getpass
 
 import bcrypt
 from app.models import User
+from django.conf import settings
 from filesystem.crypto import jwt_decode
 from rest_framework.response import Response
 
-master_secret_key = getpass('tell me the master secret key you are going to use')
 salt = bcrypt.gensalt()
 
 
@@ -32,6 +32,6 @@ def need_authorization(func):
 
 
 def get_hashed_pass(raw_password):
-    combo_password = raw_password + salt + master_secret_key
-    hashed_password = bcrypt.hashpw(combo_password, salt)
+    combo_password = raw_password + settings.SECRET_KEY
+    hashed_password = bcrypt.hashpw(combo_password.encode(), salt)
     return hashed_password

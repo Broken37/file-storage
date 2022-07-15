@@ -11,7 +11,7 @@ def get_random_string(length=32):
 
 
 def jwt_encode(payload):
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256', headers={"kid": "0"})
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
 
 def jwt_decode(token):

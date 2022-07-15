@@ -1,7 +1,8 @@
-from commands import auth_key, path
+from commands import path, defined_commands
 
 command = None
 while command != 'exit':
-    command = input(f"path > ")
-    if not auth_key:
-        print('pls login if you have account or signup if you don\'t')
+    inputs = input(f"{path} > ").split()
+    command = inputs[0]
+    if command in defined_commands:
+        defined_commands[command](*inputs[1:])

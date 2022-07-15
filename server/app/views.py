@@ -3,7 +3,7 @@ from app.utils import get_hashed_pass
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from server.app.utils import need_authorization
+from app.utils import need_authorization
 
 
 class FileView(APIView):
@@ -11,11 +11,10 @@ class FileView(APIView):
     def get(self, request, token):
         try:
             file = File.objects.get(token=token)
-        except File.DoesNotExists:
+        except File.DoesNotExist:
             return Response(status=404)
         return Response(dict(data=file.data))
 
-    @need_authorization
     def post(self, request):
         data = request.POST['data']
         file = File.objects.create(data=data)
@@ -36,7 +35,7 @@ class FileView(APIView):
     def delete(self, request, token):
         try:
             File.objects.get(token=token).delete()
-        except File.DoesNotExists:
+        except File.DoesNotExist:
             return Response(status=404)
         return Response()
 
@@ -44,10 +43,13 @@ class FileView(APIView):
 def login(request):
     user_name = request.POST.get('user_name')
     password = request.POST.get('password')
-    user = User.objects.get_or_404(user_name=user_name)
+    try:
+        user = User.objects.get(user_name=user_name)
+    except User.DoesNotExist:
+        return Response(status=404)
     if user.password != get_hashed_pass(password):
         return Response(status=401)
-    return Response(dict(authorization=user.get_authorization(), root_key=user.root_key))
+    return Response(dict(authorization=user.get_authorization(), root_token=user.root_token))
 
 
 def signup(request):
@@ -55,6 +57,7 @@ def signup(request):
     last_name = request.POST.get('last_name')
     user_name = request.POST.get('user_name')
     password = request.POST.get('password')
+    root_token = request.POST.get('root_token')
     User.objects.create(first_name=first_name, last_name=last_name, user_name=user_name,
-                        password=get_hashed_pass(password))
+                        password=get_hashed_pass(password), root_token=root_token)
     return Response(status=201)

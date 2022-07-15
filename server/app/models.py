@@ -1,8 +1,7 @@
 import time
 
-from crypto import get_random_string
 from django.db import models
-from filesystem.crypto import jwt_encode
+from filesystem.crypto import jwt_encode, get_random_string
 
 
 class User(models.Model):
@@ -11,7 +10,7 @@ class User(models.Model):
     last_name = models.CharField(max_length=32)
     user_name = models.CharField(max_length=32, unique=True)
     password = models.CharField(max_length=128)
-    root_key = models.CharField(max_length=32, default=get_random_string)
+    root_token = models.CharField(max_length=32, default=get_random_string)
 
     def get_authorization(self):
         payload = dict(
@@ -23,5 +22,5 @@ class User(models.Model):
 
 
 class File(models.Model):
-    key = models.CharField(max_length=32, default=get_random_string, unique=True)
+    token = models.CharField(max_length=32, default=get_random_string, unique=True)
     data = models.TextField()
