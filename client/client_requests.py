@@ -16,7 +16,7 @@ def decode_data_with_hash(encoded_data):
     payload = jwt_decode(encoded_data)
     if hash(payload['data']) != payload['hash']:
         raise ValueError
-    return jwt_encode(payload)
+    return payload['data']
 
 
 def get_file(token, auth_key):
@@ -55,4 +55,4 @@ def delete_file(token, auth_key):
         headers={'AUTHORIZATION': auth_key},
     )
     response.raise_for_status()
-    return response.json().get('data')
+    return

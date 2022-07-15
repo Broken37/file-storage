@@ -25,16 +25,16 @@ def find_file(path):
     if path in cache:
         return cache[path]
     if path == '~':
-        data = cache.get(path, get_file(root_token, auth_key))
-        cache[path] = data
-        return data
-    file_name = path[path.rfind('/'):]
+        _, data = cache.get(path, (root_token, get_file(root_token, auth_key)))
+        cache[path] = root_token, data
+        return root_token, data
+    file_name = path[path.rfind('/') + 1:]
     father_path = path[:path.rfind('/')]
     dir_manager = DirectoryManager(father_path)
     for name, token in dir_manager.list:
         if name == file_name:
             data = get_file(token, auth_key)
-            cache[path] = data
+            cache[path] = token, data
             return token, data
 
 
@@ -43,14 +43,19 @@ class DirectoryManager:
 
     def add(self, name, token):
         if not (name, token) in self.list:
-            self.list.append((name, token))
+            self.list.append([name, token])
 
     def remove(self, remove_token):
         remove_name = None
+        print(self.list)
+        print(remove_token)
         for name, token in self.list:
             if remove_token == token:
                 remove_name = name
-        self.list.remove((remove_name, remove_token))
+        if remove_name:
+            print(self.list)
+            print((remove_name, remove_token))
+            self.list.remove([remove_name, remove_token])
 
     def put(self):
         data = json.dumps(dict(list=self.list, type=self.Type))
@@ -131,7 +136,7 @@ def mv(input_path, output_path):
 
 
 @login_required
-def ls(input_path):
+def ls(input_path='.'):
     absolute_path = input_path if input_path.startswith('~') else relative_to_absolute(input_path)
     try:
         _, data = find_file(absolute_path)
@@ -187,10 +192,10 @@ def cd(input_path):
 
 
 def signup():
-    first_name = input("enter your first name:")
-    last_name = input("enter your last name:")
-    user_name = input("enter your user name:")
-    password = input("enter your password:")
+    first_name = input("enter your first name: ")
+    last_name = input("enter your last name: ")
+    user_name = input("enter your user name: ")
+    password = input("enter your password: ")
 
     data = json.dumps(dict(list=list(), type='directory'))
     token = post_file(data, auth_key)
@@ -209,14 +214,14 @@ def signup():
 
 
 def login():
-    user_name = input("enter your user name:")
-    password = input("enter your password:")
+    user_name = input("enter your user name: ")
+    password = input("enter your password: ")
     data = {
         'user_name': user_name,
         'password': password,
     }
     response = post(f"{constants.SERVER_URL}/login", data=data)
-    if response.status_code == 201:
+    if response.status_code == 200:
         print("login succeeded")
         global auth_key, root_token
         json_response = response.json()
@@ -235,6 +240,7 @@ defined_commands = {
     'ls': ls,
     'mkdir': mkdir,
     'rm': rm,
+    'mv': mv,
     'touch': touch,
     'signup': signup,
     'login': login,

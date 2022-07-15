@@ -1,12 +1,13 @@
 from app.models import File, User
 from app.utils import get_hashed_pass
+from app.utils import need_authorization
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from app.utils import need_authorization
+from django.http import JsonResponse, HttpResponse
 
 
 class FileView(APIView):
+
     @need_authorization
     def get(self, request, token):
         try:
@@ -46,10 +47,10 @@ def login(request):
     try:
         user = User.objects.get(user_name=user_name)
     except User.DoesNotExist:
-        return Response(status=404)
+        return HttpResponse(status=404)
     if user.password != get_hashed_pass(password):
-        return Response(status=401)
-    return Response(dict(authorization=user.get_authorization(), root_token=user.root_token))
+        return HttpResponse(status=401)
+    return JsonResponse(dict(authorization=user.get_authorization(), root_token=user.root_token))
 
 
 def signup(request):
@@ -60,4 +61,4 @@ def signup(request):
     root_token = request.POST.get('root_token')
     User.objects.create(first_name=first_name, last_name=last_name, user_name=user_name,
                         password=get_hashed_pass(password), root_token=root_token)
-    return Response(status=201)
+    return HttpResponse(status=201)
