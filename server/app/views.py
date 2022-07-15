@@ -9,7 +9,10 @@ from server.app.utils import need_authorization
 class FileView(APIView):
     @need_authorization
     def get(self, request, token):
-        file = File.objects.get_or_404(token=token)
+        try:
+            file = File.objects.get(token=token)
+        except File.DoesNotExists:
+            return Response(status=404)
         return Response(dict(data=file.data))
 
     @need_authorization
@@ -20,11 +23,22 @@ class FileView(APIView):
 
     @need_authorization
     def put(self, request, token):
-        file = File.objects.get_or_404(token=token)
+        try:
+            file = File.objects.get(token=token)
+        except File.DoesNotExists:
+            return Response(status=404)
         data = request.POST['data']
         file.data = data
         file.save()
         return Response(dict(data=file.data))
+
+    @need_authorization
+    def delete(self, request, token):
+        try:
+            File.objects.get(token=token).delete()
+        except File.DoesNotExists:
+            return Response(status=404)
+        return Response()
 
 
 def login(request):

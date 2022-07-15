@@ -1,12 +1,7 @@
-from requests import post
-
-auth_key = None
-
-
+from commands import auth_key, path
 
 command = None
 while command != 'exit':
-    command = input()
+    command = input(f"path > ")
     if not auth_key:
-
-        commands = input('pls login if you have account or signup if you don\'t')
+        print('pls login if you have account or signup if you don\'t')
