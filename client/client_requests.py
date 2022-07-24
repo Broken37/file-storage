@@ -83,6 +83,7 @@ def encrypt_share(data, user_public_key):
 def decrypt_share(encrypted_data):
     return json.loads(rsa_decrypt(base64.b64decode(encrypted_data)))
 
+
 def create_share(token, data, username, auth_key):
     user_public_key = get_user_public_key(username)
     if not user_public_key:
@@ -101,7 +102,6 @@ def get_my_shares(auth_key):
         headers={'AUTHORIZATION': auth_key},
     )
     result = list()
-    print(response.json())
     for token, data in response.json():
         result.append((token, decrypt_share(data)))
     return result

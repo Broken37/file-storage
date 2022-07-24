@@ -297,13 +297,18 @@ def _fetch_one_share(data):
 
 @login_required
 def fetch_shares():
-    share_dir = find_file('~/shares')
+    share_path = '~/shares'
+    share_dir = find_file(share_path)
     if share_dir:
-        rm('~/shares', '-r')
+        dir = DirectoryManager(share_path)
+        for _, token, write_key, _ in dir.list:
+            delete_file(token, write_key, auth_key)
+        dir.list.clear()
+        dir.put()
+    else:
+        mkdir(share_path)
     cache.clear()
-    mkdir('~/shares')
     shares = get_my_shares(auth_key)
-    print(shares)
     for token, data in shares:
         _fetch_one_share(data)
 
