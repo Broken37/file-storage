@@ -11,18 +11,14 @@ salt = b'$2b$12$Ks8v.2.M.l2aQSygyN/EM.'
 
 def get_user(authorization):
     payload = jwt_decode(authorization)
-    print(payload)
     if payload['expires'] < time.time():
         return None
-    print('got here')
     return User.objects.get(user_name=payload['user_name'])
 
 
 def need_authorization(func):
     def new_func(cls, request, *args, **kwargs):
-        print(request.headers)
         authorization = request.headers.get('Authorization')
-        print(authorization)
         if not authorization:
             return Response(status=401)
         user = get_user(authorization)

@@ -11,6 +11,7 @@ class User(models.Model):
     user_name = models.CharField(max_length=32, unique=True)
     password = models.CharField(max_length=128)
     root_token = models.CharField(max_length=32, default=get_random_string)
+    public_key = models.TextField()
 
     def get_authorization(self):
         payload = dict(
@@ -22,5 +23,12 @@ class User(models.Model):
 
 
 class File(models.Model):
-    token = models.CharField(max_length=32, default=get_random_string, unique=True)
+    token = models.CharField(max_length=32, default=get_random_string, unique=True, primary_key=True)
+    write_key = models.CharField(max_length=32, default=get_random_string)
+    data = models.TextField(null=True)
+
+
+class Share(models.Model):
+    file = models.ForeignKey(File, on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE)
     data = models.TextField()
